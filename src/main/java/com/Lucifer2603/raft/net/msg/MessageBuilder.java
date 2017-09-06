@@ -28,6 +28,9 @@ public class MessageBuilder {
         AppendLogEntryRequest msg = new AppendLogEntryRequest();
         setBase(cxt, msg);
 
+        msg.msgId = idGenerator.getAndIncrement();
+        msg.msgType = MessageType.APPEND_LOG_REQ;
+
         return msg;
     }
 

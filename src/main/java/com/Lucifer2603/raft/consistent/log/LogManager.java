@@ -57,6 +57,16 @@ public class LogManager {
         return startIdx;
     }
 
+    public LogEntry findByPosition(int pos) {
+        return logRecords[pos];
+    }
+
+    public LogEntry updateLogEntryStatus(int pos, int status) {
+        logRecords[pos].status = status;
+
+        return logRecords[pos];
+    }
+
 
 //    private void add(LogEntry entry) {
 //
@@ -111,7 +121,7 @@ public class LogManager {
     private int position;
 
 
-    public LogEntry[] findProgress(int followerNumber) {
+    public LogEntry[] findFollowerProgress(int followerNumber) {
 
         int replicatedIdx = replicatedMap.get(followerNumber);
 
@@ -119,6 +129,10 @@ public class LogManager {
         System.arraycopy(logRecords, replicatedIdx + 1, content, 0, content.length);
 
         return content;
+    }
+
+    public int findFollowerPosition(int followerNumber) {
+        return replicatedMap.get(followerNumber);
     }
 
     public void updateProgress(int followerNumber, int newPosition) {

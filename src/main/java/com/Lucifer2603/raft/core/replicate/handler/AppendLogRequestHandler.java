@@ -57,6 +57,8 @@ public class AppendLogRequestHandler implements EventHandler {
             return;
         }
 
+        // 更新heartbeat timeout
+        cxt.lastHeartBeatTime = System.currentTimeMillis();
 
         // 直接写入日志.如果成功则回复OK.否则reject.
         LogManager logMgr = cxt.logManager;

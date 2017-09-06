@@ -96,6 +96,14 @@ public class AppendLogResponseHandler implements EventHandler {
                 // 那么 commitIndex++, 然后从 prepareMap remove.
                 logMgr.commitIndex = logMgr.commitIndex > logPosition ? logMgr.commitIndex : logPosition;
                 logMgr.getPrepareLogMap().remove(logPosition);
+
+                /**
+                 * 状态
+                 * 1. prepare
+                 * 2. committed
+                 * 3. applied
+                 */
+                LogEntry logEntry = logMgr.updateLogEntryStatus(logPosition, 2);
             }
         }
 

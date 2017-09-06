@@ -1,37 +1,38 @@
 package com.Lucifer2603.raft.core.replicate.handler;
 
-import com.baidu.fpd.raft.consistent.log.LogEntry;
-import com.baidu.fpd.raft.consistent.log.LogManager;
-import com.baidu.fpd.raft.constants.RoleType;
-import com.baidu.fpd.raft.core.Event.Event;
-import com.baidu.fpd.raft.core.EventHandler;
-import com.baidu.fpd.raft.core.common.RuntimeContext;
-import com.baidu.fpd.raft.core.replicate.event.NewLogInsertEvent;
+import com.Lucifer2603.raft.consistent.log.LogEntry;
+import com.Lucifer2603.raft.consistent.log.LogManager;
+import com.Lucifer2603.raft.constants.RoleType;
+import com.Lucifer2603.raft.core.Event.Event;
+import com.Lucifer2603.raft.core.EventHandler;
+import com.Lucifer2603.raft.core.common.RuntimeContext;
+import com.Lucifer2603.raft.core.replicate.event.AppendLogClientEvent;
 
 /**
  * @author zhangchen20
  */
-public class NewLogInsertHandler implements EventHandler {
+public class AppendLogClientRequestHandler implements EventHandler {
 
-    // leader端
     public void process(Event e) {
 
-        if (!(e instanceof NewLogInsertEvent)) {
+        if (!(e instanceof AppendLogClientEvent)) {
             return;
         }
 
-        NewLogInsertEvent event = (NewLogInsertEvent) e;
+        AppendLogClientEvent event = (AppendLogClientEvent) e;
         RuntimeContext cxt = RuntimeContext.get();
 
+        // 检查角色是否leader
         if (cxt.roleType == RoleType.Candidate) {
-            // todo 缓存,然后转发
-            e.ends();
+            cxt.candidateWaitingAppendingLogEvents.add(event);
+            event.ends();
             return;
         }
 
         if (cxt.roleType == RoleType.Follower) {
             // 转发给leader
-            e.ends();
+            transmit(event);
+            event.ends();
             return;
         }
 
@@ -39,6 +40,7 @@ public class NewLogInsertHandler implements EventHandler {
         LogManager logMgr = cxt.logManager;
 
         // 更新本地
+        // 新建logEntry
         LogEntry entry = new LogEntry();
         // todo content
         entry.content = "";
@@ -56,9 +58,9 @@ public class NewLogInsertHandler implements EventHandler {
 
         logMgr.append(entry);
 
+    }
 
-        // 广播一次
-        // todo braodcast
-
+    private void transmit(AppendLogClientEvent event) {
+        // todo
     }
 }
