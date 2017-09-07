@@ -7,6 +7,8 @@ public enum MessageType {
 
     // 日志同步请求 & 回复
     APPEND_LOG_REQ,
-    APPEND_LOG_RESP;
+    APPEND_LOG_RESP,
 
+    VOTE_REQ,
+    VOTE_RESP;
 }

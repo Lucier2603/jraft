@@ -33,6 +33,7 @@ public class AppendLogRequestHandler implements EventHandler {
         RuntimeContext cxt = RuntimeContext.get();
 
         // 检查role
+        // 考虑新leader的第一次发送
         if (cxt.roleType != RoleType.Follower) {
             event.ends();
             return;

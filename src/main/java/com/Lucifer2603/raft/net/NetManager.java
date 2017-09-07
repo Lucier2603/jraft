@@ -116,6 +116,7 @@ public class NetManager {
                         System.out.println(localNumber + " accept from " + remoteNumber);
                     }
 
+                    // todo 需要做成异步,并且考虑多线程的锁.
                     if (key.isReadable()) {
                         System.out.println(localNumber + " isReadable! ");
                         SocketChannel channel = (SocketChannel) key.channel();

@@ -3,6 +3,8 @@ package com.Lucifer2603.raft.net.msg;
 import com.Lucifer2603.raft.conf.LocalConfig;
 import com.Lucifer2603.raft.constants.MessageType;
 import com.Lucifer2603.raft.core.common.RuntimeContext;
+import com.Lucifer2603.raft.core.elect.msg.VoteRequest;
+import com.Lucifer2603.raft.core.elect.msg.VoteResponse;
 import com.Lucifer2603.raft.core.replicate.msg.AppendLogEntryRequest;
 import com.Lucifer2603.raft.core.replicate.msg.AppendLogEntryResponse;
 
@@ -28,7 +30,6 @@ public class MessageBuilder {
         AppendLogEntryRequest msg = new AppendLogEntryRequest();
         setBase(cxt, msg);
 
-        msg.msgId = idGenerator.getAndIncrement();
         msg.msgType = MessageType.APPEND_LOG_REQ;
 
         return msg;
@@ -40,7 +41,6 @@ public class MessageBuilder {
 
         msg.success = Boolean.TRUE;
         msg.toServer = cxt.currentLeader;
-        msg.msgId = idGenerator.getAndIncrement();
         msg.msgType = MessageType.APPEND_LOG_RESP;
 
         return msg;
@@ -52,8 +52,24 @@ public class MessageBuilder {
 
         msg.success = Boolean.FALSE;
         msg.toServer = cxt.currentLeader;
-        msg.msgId = idGenerator.getAndIncrement();
         msg.msgType = MessageType.APPEND_LOG_RESP;
+
+        return msg;
+    }
+
+    public static VoteRequest buildVoteRequest(RuntimeContext cxt) {
+        VoteRequest msg = new VoteRequest();
+        setBase(cxt, msg);
+
+        msg.candidateNumber = LocalConfig.number;
+        msg.candidateTerm = cxt.currentTerm;
+
+        return msg;
+    }
+
+    public static VoteResponse buildVoteResponse(RuntimeContext cxt) {
+        VoteResponse msg = new VoteResponse();
+        setBase(cxt, msg);
 
         return msg;
     }

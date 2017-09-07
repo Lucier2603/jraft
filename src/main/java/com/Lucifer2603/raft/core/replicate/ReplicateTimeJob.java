@@ -41,7 +41,7 @@ public class ReplicateTimeJob {
                                                  RuntimeContext.get().eventEngine.publishEvent(new HeartbeatBroadcastEvent());
                                              }
                                          },
-                    5 * 1000, 500, TimeUnit.MILLISECONDS);
+                    1000, 500, TimeUnit.MILLISECONDS);
         }
 
         // follower定期检查heartbeat
@@ -57,12 +57,20 @@ public class ReplicateTimeJob {
                     }
                 }
             },
-            10 * 1000 + HEARTBEAT_TIMEOUT, HEARTBEAT_TIMEOUT, TimeUnit.MILLISECONDS);
+            10 * 1000, 500, TimeUnit.MILLISECONDS);
         }
+    }
+
+
+    // todo 是否可以这样做
+    public void endAsyn() {
+        executor.shutdown();
     }
 
     public void end() {
         executor.shutdown();
+
+        while (!executor.isTerminated());
     }
 
 }

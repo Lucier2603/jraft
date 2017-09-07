@@ -67,6 +67,17 @@ public class LogManager {
         return logRecords[pos];
     }
 
+    // returns POSITIVE if a is latest than b. NEGTIVE if a is smaller. ZERO if equals.
+    // todo this method should move to Utils.
+    public static int compare(LogEntry a, LogEntry b) {
+
+        // todo 可以简化
+        if (a.logTerm != b.logTerm)
+            return a.logTerm - b.logTerm;
+
+        return a.logNo - b.logNo;
+    }
+
 
 //    private void add(LogEntry entry) {
 //

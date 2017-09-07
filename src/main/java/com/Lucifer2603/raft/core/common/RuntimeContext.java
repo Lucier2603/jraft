@@ -4,11 +4,14 @@ package com.Lucifer2603.raft.core.common;
 import com.Lucifer2603.raft.consistent.log.LogManager;
 import com.Lucifer2603.raft.constants.RoleType;
 import com.Lucifer2603.raft.core.Event.EventEngine;
+import com.Lucifer2603.raft.core.replicate.ReplicateTimeJob;
 import com.Lucifer2603.raft.core.replicate.event.AppendLogClientEvent;
 import com.Lucifer2603.raft.net.NetManager;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author zhangchen20
@@ -33,6 +36,8 @@ public class RuntimeContext {
 
     public NetManager netManager;
 
+    public ReplicateTimeJob timeJob;
+
 
 
     // 当candidate的时候,被缓存的客户端消息
@@ -41,10 +46,28 @@ public class RuntimeContext {
     // 当follower的时候,上次接受到 HeartBeat 的时间
     public long lastHeartBeatTime;
 
+    // 当candidate的时候,accpet/reject的serverNumber
+    public Set electAcceptSet = new HashSet<>();
+    public Set electRejectSet = new HashSet<>();
+
+    // 当follower的时候,是否accept/reject过VoteRequest
+    // 如果在某个term voteFor过, 那么设定为这个term的值.
+    public int voteForFlag = 0;
 
     private static RuntimeContext context;
 
     public static RuntimeContext get() {
         return context;
+    }
+
+    public void init() {
+    }
+
+    public void refresh() {
+
+        lastHeartBeatTime = System.currentTimeMillis();
+        electAcceptSet.clear();
+        electAcceptSet.clear();
+
     }
 }
