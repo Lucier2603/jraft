@@ -18,14 +18,30 @@ public class VoteRequestHandler implements EventHandler {
 
     public void process(Event e) {
 
-        // todo 只会accept一次
-
         if (!(e instanceof VoteRequestEvent)) {
             return;
         }
 
         VoteRequestEvent event = (VoteRequestEvent) e;
         RuntimeContext cxt = RuntimeContext.get();
+        VoteRequest request = (VoteRequest) event.raftMessage;
+
+
+        // 先设置vote for.
+        cxt.lock();
+        try {
+            // 已经vote for
+            // vote for 只会递增
+            if (request.candidateTerm <= cxt.voteForFlag) {
+                event.ends();
+                return;
+            }
+
+            cxt.voteForFlag = request.candidateTerm;
+        } finally {
+            cxt.unlock();
+        }
+
 
         // 对于收到的vote req,需要区分各种情况.
 
@@ -38,7 +54,7 @@ public class VoteRequestHandler implements EventHandler {
         // todo 如果candidate仅仅与leader失去了链接,那么
 
 
-        VoteRequest request = (VoteRequest) event.raftMessage;
+
 
         // 判断term
         int candidateTerm = request.candidateTerm;

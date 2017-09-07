@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author zhangchen20
@@ -22,10 +24,11 @@ public class RuntimeContext {
     public RoleType roleType;
 
     // 当前的term
-    public int currentTerm;
+    public volatile int currentTerm;
 
     // 当前的leader
-    public int currentLeader;
+    public volatile int currentLeader;
+
 
 
 
@@ -40,11 +43,12 @@ public class RuntimeContext {
 
 
 
+
     // 当candidate的时候,被缓存的客户端消息
     public List<AppendLogClientEvent> candidateWaitingAppendingLogEvents = new LinkedList<>();
 
     // 当follower的时候,上次接受到 HeartBeat 的时间
-    public long lastHeartBeatTime;
+    public volatile long lastHeartBeatTime;
 
     // 当candidate的时候,accpet/reject的serverNumber
     public Set electAcceptSet = new HashSet<>();
@@ -52,13 +56,27 @@ public class RuntimeContext {
 
     // 当follower的时候,是否accept/reject过VoteRequest
     // 如果在某个term voteFor过, 那么设定为这个term的值.
-    public int voteForFlag = 0;
+    public volatile int voteForFlag = 0;
+
+
+
 
     private static RuntimeContext context;
+
+    private ReentrantLock lock;
+
+    public void lock() {
+        this.lock.lock();
+    }
+
+    public void unlock() {
+        this.lock.unlock();
+    }
 
     public static RuntimeContext get() {
         return context;
     }
+
 
     public void init() {
     }
@@ -70,4 +88,9 @@ public class RuntimeContext {
         electAcceptSet.clear();
 
     }
+
+
+
+
+
 }
