@@ -14,4 +14,8 @@ public class AppendLogRequestEvent extends Event {
     public int prevMatchTerm;
 
     public int prevMatchIndex;
+
+    public String getName() {
+        return "AppendLogRequestEvent";
+    }
 }

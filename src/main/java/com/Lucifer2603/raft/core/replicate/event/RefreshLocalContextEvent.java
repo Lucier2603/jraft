@@ -8,4 +8,7 @@ import com.Lucifer2603.raft.core.Event.Event;
  */
 public class RefreshLocalContextEvent extends Event {
     // 刷新本地RunningContext
+    public String getName() {
+        return "RefreshLocalContextEvent";
+    }
 }
