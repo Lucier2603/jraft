@@ -5,5 +5,7 @@ package com.Lucifer2603.raft.core.Event;
  */
 public interface EventEngine {
 
+    void publishEventAsync(Event e, EventCallback callback);
+
     void publishEvent(Event e);
 }

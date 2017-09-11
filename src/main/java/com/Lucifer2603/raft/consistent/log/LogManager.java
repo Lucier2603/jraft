@@ -174,4 +174,9 @@ public class LogManager {
     public Map<Integer, Set<Integer>> getPrepareLogMap() {
         return prepareLogMap;
     }
+
+    // 清空所有 leader context
+    public void clear() {
+
+    }
 }

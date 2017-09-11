@@ -31,13 +31,41 @@ public class AppendLogRequestHandler implements EventHandler {
         // todo request将被leader以心跳的形式发送.
         AppendLogRequestEvent event = (AppendLogRequestEvent) e;
         RuntimeContext cxt = RuntimeContext.get();
+        AppendLogEntryRequest request = (AppendLogEntryRequest) event.raftMessage;
 
         // 检查role
-        // 考虑新leader的第一次发送
-        if (cxt.roleType != RoleType.Follower) {
-            event.ends();
-            return;
+        // todo
+        // leader收到,一般有2种情况: 收到的是之前的term,那么是延迟,或者旧leader还不知道当前情况,reject;收到的是之后的term,说明有新的leader当选了.
+        if (cxt.roleType == RoleType.Leader) {
+
+            if (cxt.currentTerm > request.fromTerm) {
+                reject(event);
+                return;
+            }
+
+            // will never happen
+            if (cxt.currentTerm == request.fromTerm) ;
+
+            if (cxt.currentTerm < request.fromTerm) {
+                // leader 需要降级
+                cxt.lock();
+                try {
+                    cxt.currentLeader = 1; // todo 可以通过ping fromServer来getLeader
+                    cxt.currentTerm = request.fromTerm;
+                    cxt.electAcceptSet.clear();
+                    cxt.electRejectSet.clear();
+                    cxt.logManager.clear();
+                    cxt.lastHeartBeatTime = System.currentTimeMillis();
+                    cxt.roleType = RoleType.Follower;
+                } finally {
+                    cxt.unlock();
+                }
+            }
         }
+//        if (cxt.roleType != RoleType.Follower) {
+//            event.ends();
+//            return;
+//        }
 
         // 检查Term
         int remoteTerm = event.raftMessage.fromTerm;

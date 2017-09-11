@@ -196,4 +196,12 @@ public class NetManager {
         return msgHistory.get(fromTerm + "|" + msgId);
     }
 
+    public void ping() {
+
+    }
+
+    public void pong() {
+
+    }
+
 }

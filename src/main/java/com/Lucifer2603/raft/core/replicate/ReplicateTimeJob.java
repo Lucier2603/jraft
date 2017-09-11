@@ -31,6 +31,8 @@ public class ReplicateTimeJob {
 
     public void start() {
 
+        // todo 改成2个任务一起进行,
+
         // leader定时发布心跳信息
         if (RuntimeContext.get().roleType == RoleType.Leader) {
             executor.scheduleAtFixedRate(new Runnable() {
