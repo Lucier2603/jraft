@@ -108,4 +108,8 @@ public class AppendLogResponseHandler implements EventHandler {
         }
 
     }
+
+    public void onException(Event e, Throwable t) {
+
+    }
 }

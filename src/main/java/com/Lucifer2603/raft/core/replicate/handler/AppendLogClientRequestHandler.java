@@ -63,4 +63,8 @@ public class AppendLogClientRequestHandler implements EventHandler {
     private void transmit(AppendLogClientEvent event) {
         // todo
     }
+
+    public void onException(Event e, Throwable t) {
+
+    }
 }

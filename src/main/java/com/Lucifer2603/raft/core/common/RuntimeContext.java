@@ -97,6 +97,16 @@ public class RuntimeContext {
 
     }
 
+    public void refresh() {
+        // todo 与集群通信,获得最新的leader,term信息.
+        lock();
+
+        try {
+
+        } finally {
+            unlock();
+        }
+    }
 
 
 

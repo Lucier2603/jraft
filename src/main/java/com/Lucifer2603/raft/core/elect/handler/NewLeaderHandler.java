@@ -32,7 +32,7 @@ public class NewLeaderHandler implements EventHandler {
         cxt.roleType = RoleType.Leader;
 
         cxt.clear();
-        cxt.timeJob.start();
+        cxt.timeJob.start(RoleType.Leader);
 
         // 处理在candidate时候的缓存.
         List<AppendLogClientEvent> appendings = cxt.candidateWaitingAppendingLogEvents;

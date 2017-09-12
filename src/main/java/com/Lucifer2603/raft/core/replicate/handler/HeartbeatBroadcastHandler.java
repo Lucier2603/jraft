@@ -57,4 +57,8 @@ public class HeartbeatBroadcastHandler implements EventHandler {
         }
 
     }
+
+    public void onException(Event e, Throwable t) {
+
+    }
 }

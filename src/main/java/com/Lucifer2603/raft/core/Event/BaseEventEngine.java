@@ -41,7 +41,7 @@ public class BaseEventEngine implements EventEngine {
             TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>());
 
-//    private ExecutorService singleExecutor = Executors.newSingleThreadExecutor();
+    private ExecutorService singleExecutor = Executors.newSingleThreadExecutor();
 
     // 使用 single thread pool
     public void publishEvent(final Event e) {
@@ -52,7 +52,10 @@ public class BaseEventEngine implements EventEngine {
             return;
         }
 
-        handlers.process(e);
+        // 通过singleThread, 保证所有的event有序执行.
+        singleExecutor.execute(() -> {
+            handlers.process(e);
+        });
 
     }
 
