@@ -4,7 +4,7 @@ package com.Lucifer2603.raft.core.common;
 import com.Lucifer2603.raft.consistent.log.LogManager;
 import com.Lucifer2603.raft.constants.RoleType;
 import com.Lucifer2603.raft.core.Event.EventEngine;
-import com.Lucifer2603.raft.core.replicate.ReplicateTimeJob;
+import com.Lucifer2603.raft.core.replicate.BackendJob;
 import com.Lucifer2603.raft.core.replicate.event.AppendLogClientEvent;
 import com.Lucifer2603.raft.net.NetManager;
 
@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -39,25 +38,33 @@ public class RuntimeContext {
 
     public NetManager netManager;
 
-    public ReplicateTimeJob timeJob;
+    public BackendJob timeJob;
+
+    // todo 内存管理器 境外内存
+    // todo destory时,使用Runtime.getRuntime().addShutdownHook
 
 
 
 
+    /**
+     * candidate
+     */
     // 当candidate的时候,被缓存的客户端消息
     public List<AppendLogClientEvent> candidateWaitingAppendingLogEvents = new LinkedList<>();
-
-    // 当follower的时候,上次接受到 HeartBeat 的时间
-    public volatile long lastHeartBeatTime;
 
     // 当candidate的时候,accpet/reject的serverNumber
     public Set electAcceptSet = new HashSet<>();
     public Set electRejectSet = new HashSet<>();
 
+    // 当当candidate的时候,elect timeout
+    public volatile long nextElectTimeout;
+
     // 当follower的时候,是否accept/reject过VoteRequest
     // 如果在某个term voteFor过, 那么设定为这个term的值.
     public volatile int voteForFlag = 0;
 
+    // 当follower的时候,上次接受到 HeartBeat 的时间
+    public volatile long lastHeartBeatTime;
 
 
 
@@ -81,7 +88,8 @@ public class RuntimeContext {
     public void init() {
     }
 
-    public void refresh() {
+    // clear all resources and flags.
+    public void clear() {
 
         lastHeartBeatTime = System.currentTimeMillis();
         electAcceptSet.clear();

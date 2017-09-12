@@ -11,6 +11,7 @@ import com.Lucifer2603.raft.core.common.RuntimeContext;
 import com.Lucifer2603.raft.core.elect.event.StartElectEvent;
 import com.Lucifer2603.raft.core.elect.msg.VoteRequest;
 import com.Lucifer2603.raft.net.msg.MessageBuilder;
+import org.apache.commons.lang.math.RandomUtils;
 
 /**
  * @author zhangchen20
@@ -18,7 +19,6 @@ import com.Lucifer2603.raft.net.msg.MessageBuilder;
 public class StartElectHandler implements EventHandler {
 
     // 开始一个新的选举
-    // todo random timeout
     public void process(Event e) {
 
         if (!(e instanceof StartElectEvent)) {
@@ -40,7 +40,9 @@ public class StartElectHandler implements EventHandler {
         cxt.currentLeader = -1;
 
         // 关闭一切定时任务 阻塞关闭.
+        // todo turnto suspend?
         cxt.timeJob.end();
+        cxt.nextElectTimeout = RandomUtils.nextInt(50 * 1000) + System.currentTimeMillis();
 
         // 必须等所有都处理完毕后,再广播
         // 广播vote request
@@ -56,6 +58,13 @@ public class StartElectHandler implements EventHandler {
 
             cxt.netManager.saveMsg(request);
         }
+
+        // 重启作为candidate的监听
+        cxt.timeJob.restart(RoleType.Candidate);
+
+    }
+
+    public void onException(Event e, Throwable t) {
 
     }
 }

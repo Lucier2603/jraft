@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author zhangchen20
  */
-public class ReplicateTimeJob {
+public class BackendJob {
 
 
     private ScheduledExecutorService executor;
@@ -29,12 +29,12 @@ public class ReplicateTimeJob {
     }
 
 
-    public void start() {
+    public void start(RoleType roleType) {
 
         // todo 改成2个任务一起进行,
 
         // leader定时发布心跳信息
-        if (RuntimeContext.get().roleType == RoleType.Leader) {
+        if (roleType == RoleType.Leader) {
             executor.scheduleAtFixedRate(new Runnable() {
                                              @Override
                                              public void run() {
@@ -47,7 +47,7 @@ public class ReplicateTimeJob {
         }
 
         // follower定期检查heartbeat
-        if (RuntimeContext.get().roleType == RoleType.Follower) {
+        if (roleType == RoleType.Follower) {
             executor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
@@ -61,6 +61,31 @@ public class ReplicateTimeJob {
             },
             10 * 1000, 500, TimeUnit.MILLISECONDS);
         }
+
+        // candidate timeout check
+        if (roleType == RoleType.Candidate) {
+            executor.scheduleAtFixedRate(new Runnable() {
+                                             @Override
+                                             public void run() {
+                                                 long electTimeout = RuntimeContext.get().nextElectTimeout;
+
+                                                 if (System.currentTimeMillis() >= electTimeout) {
+                                                     RuntimeContext.get().eventEngine.publishEvent(new StartElectEvent());
+                                                 }
+                                             }
+                                         },
+                    500, 500, TimeUnit.MILLISECONDS);
+        }
+
+    }
+
+    public void restart(RoleType roleType) {
+        // todo 有没有一种办法可以让executor restart without terminating
+    }
+
+
+    public void startAsCandidate() {
+
     }
 
 

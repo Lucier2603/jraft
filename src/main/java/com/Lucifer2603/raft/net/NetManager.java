@@ -3,6 +3,7 @@ package com.Lucifer2603.raft.net;
 import com.Lucifer2603.raft.conf.ClusterConfig;
 import com.Lucifer2603.raft.conf.LocalConfig;
 import com.Lucifer2603.raft.core.common.RuntimeContext;
+import com.Lucifer2603.raft.core.elect.msg.PongMessage;
 import com.Lucifer2603.raft.net.msg.HandlerMapping;
 import com.Lucifer2603.raft.net.msg.MessageHandler;
 import com.Lucifer2603.raft.net.msg.RaftMessage;
@@ -196,10 +197,21 @@ public class NetManager {
         return msgHistory.get(fromTerm + "|" + msgId);
     }
 
-    public void ping() {
+    
+    /**
+     * ping & pong is Sync Operation. Invokers will wait until function returns or an exception is thrown out.
+     */
 
+    // ping will send a PingMessage, and receives a PongMessage.
+    public PongMessage ping() {
+        return null;
+    }
+    
+    public PongMessage ping(long timeout) {
+        throw new RuntimeException("Ping time out!");
     }
 
+    // pong receives a PingMessage, and send a PongMessage.
     public void pong() {
 
     }

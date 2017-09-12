@@ -7,6 +7,7 @@ import com.Lucifer2603.raft.core.Event.Event;
 import com.Lucifer2603.raft.core.EventHandler;
 import com.Lucifer2603.raft.core.common.RuntimeContext;
 import com.Lucifer2603.raft.core.elect.event.VoteRequestEvent;
+import com.Lucifer2603.raft.core.elect.msg.PongMessage;
 import com.Lucifer2603.raft.core.elect.msg.VoteRequest;
 import com.Lucifer2603.raft.core.elect.msg.VoteResponse;
 import com.Lucifer2603.raft.net.msg.MessageBuilder;
@@ -28,6 +29,7 @@ public class VoteRequestHandler implements EventHandler {
 
 
         // 先设置vote for.
+        // use lock to pretent 2 candidates.
         cxt.lock();
         try {
             // 已经vote for
@@ -38,6 +40,7 @@ public class VoteRequestHandler implements EventHandler {
             }
 
             cxt.voteForFlag = request.candidateTerm;
+
         } finally {
             cxt.unlock();
         }
@@ -50,11 +53,6 @@ public class VoteRequestHandler implements EventHandler {
         // 3. vote term 大, 也有可能是, 接受者自身晚了.
 
         // 不管怎么说,都需要结合日志进度来判断.
-
-        // todo 如果candidate仅仅与leader失去了链接,那么
-
-
-
 
         // 判断term
         int candidateTerm = request.candidateTerm;
@@ -70,7 +68,24 @@ public class VoteRequestHandler implements EventHandler {
 
         // 对于 candidate,或者包括candidate在内的少数派,仅仅与leader失去了链接的情况,需要ping一下leader确认.
         // 此处需要设置同步 & timeout, 以防止确实是leader挂了的情况.
-        // todo
+
+        long PING_TIMEOUT = 10 * 1000;
+        boolean pingSuccessFlag;
+        try {
+            PongMessage pong = cxt.netManager.ping(PING_TIMEOUT);
+
+            // if resolvePong() returns true. 说明本server和leader都是最新的,并且沟通良好.(不代表一定是集群的leader)
+            pingSuccessFlag = resolvePong(pong);
+
+        } catch (Exception ex) {
+            pingSuccessFlag = false;
+        }
+
+        // reject if ping success
+        if (pingSuccessFlag) {
+            reject(cxt, event);
+            return;
+        }
 
 
         // 对于 candidate,或者包括candidate在内的多数派,与leader失去链接的情况. 那么ping leader将也是失败.此时比较双方日志.
@@ -84,6 +99,7 @@ public class VoteRequestHandler implements EventHandler {
             accept(cxt, event);
         }
 
+        event.pass();
 
     }
 
@@ -94,7 +110,7 @@ public class VoteRequestHandler implements EventHandler {
         response.acceptFlag = false;
         response.replyTerm = cxt.currentTerm;
 
-        event.ends();
+        event.pass();
     }
 
     public void accept(RuntimeContext cxt, VoteRequestEvent event) {
@@ -104,6 +120,20 @@ public class VoteRequestHandler implements EventHandler {
         response.acceptFlag = true;
         response.replyTerm = cxt.currentTerm;
 
-        event.ends();
+        event.pass();
+    }
+
+    public void onException(Event e, Throwable t) {
+
+    }
+
+    public boolean resolvePong(PongMessage msg) {
+        if (msg.isLeader && msg.leaderTerm == RuntimeContext.get().currentTerm)
+            return true;
+
+        // 不用考虑currentTerm过旧的情况.
+//        如果旧的leader发来commit信息，整个集群不会因此影响。
+//        如果新的leader发来信息，那么会覆盖之前的。
+        return false;
     }
 }

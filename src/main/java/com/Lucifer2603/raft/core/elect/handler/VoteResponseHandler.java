@@ -37,8 +37,8 @@ public class VoteResponseHandler implements EventHandler {
             cxt.roleType = RoleType.Follower;
             cxt.currentTerm = response.replyTerm;
             cxt.currentLeader = response.replyLeader;
-            cxt.refresh();
-            cxt.timeJob.start();
+//            cxt.refresh();
+            cxt.timeJob.start(RoleType.Follower);
 
             event.ends();
             return;
@@ -56,6 +56,14 @@ public class VoteResponseHandler implements EventHandler {
         // 检查自己的accept是否达到半数
         if (cxt.electAcceptSet.size() > ClusterConfig.CLUSTER_SIZE / 2) {
             cxt.eventEngine.publishEvent(new NewLeaderEvent());
+
+            // todo 对后续的elect消息不response.
         }
+
+        event.pass();
+    }
+
+    public void onException(Event e, Throwable t) {
+
     }
 }
