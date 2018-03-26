@@ -40,7 +40,7 @@ public class LogManagerHelper {
             // 确认找到了对应的log, 可以更新本地日志
             // todo
 
-
+            newestLog = entries[entries.length - 1];
         }
 
         // 如果没有找到这样一条日志,她的term和logNo, 与传入的 prevTerm, prevLogIndex相等, 那么就给leader返回false, 说明双方不一致
@@ -49,9 +49,13 @@ public class LogManagerHelper {
     }
 
 
+    private LogEntry newestLog;
 
+    public LogEntry getNewestLog() {
+        return newestLog;
+    }
 
-
-
-
+    public void setNewestLog(LogEntry newestLog) {
+        this.newestLog = newestLog;
+    }
 }

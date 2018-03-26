@@ -60,8 +60,7 @@ public class RuntimeContext {
     public Set electAcceptSet = new HashSet<>();
     public Set electRejectSet = new HashSet<>();
 
-    // 当当candidate的时候,elect timeout
-    public volatile long nextElectTimeout;
+
 
     // 当follower的时候,是否accept/reject过VoteRequest
     // 如果在某个term voteFor过, 那么设定为这个term的值.
