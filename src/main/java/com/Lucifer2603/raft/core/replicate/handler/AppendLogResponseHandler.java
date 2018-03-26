@@ -8,8 +8,11 @@ import com.Lucifer2603.raft.consistent.log.LogEntry;
 import com.Lucifer2603.raft.consistent.log.LogManager;
 import com.Lucifer2603.raft.consistent.log.LogManagerHelper;
 import com.Lucifer2603.raft.constants.RoleType;
+import com.Lucifer2603.raft.core.DefaultEventHandler;
 import com.Lucifer2603.raft.core.Event.Event;
 import com.Lucifer2603.raft.core.EventHandler;
+import com.Lucifer2603.raft.core.common.CandidateRuntimeContext;
+import com.Lucifer2603.raft.core.common.FollowerRuntimeContext;
 import com.Lucifer2603.raft.core.common.LeaderRuntimeContext;
 import com.Lucifer2603.raft.core.common.RuntimeContext;
 import com.Lucifer2603.raft.core.replicate.event.AppendLogResponseEvent;
@@ -23,45 +26,27 @@ import java.util.Set;
  * leader 收到 appendLog 回复
  * @author zhangchen20
  */
-public class AppendLogResponseHandler implements EventHandler {
+public class AppendLogResponseHandler extends DefaultEventHandler {
 
-    public void process(Event e) {
+    @Override
+    public boolean checkEvent(Event e) {
+        return e instanceof AppendLogResponseEvent;
+    }
 
-        if (!(e instanceof AppendLogResponseEvent)) {
-            return;
-        }
+    @Override
+    public void processAsLeader(Event e1, LeaderRuntimeContext cxt) {
 
-        AppendLogResponseEvent event = (AppendLogResponseEvent) e;
-        LeaderRuntimeContext cxt = (LeaderRuntimeContext) RuntimeContext.get();
-
-        // 检查role
-        if (cxt.roleType != RoleType.Leader) {
-            e.ends();
-            return;
-        }
-
-        AppendLogEntryResponse msg = (AppendLogEntryResponse) event.raftMessage;
-        LogManagerHelper logMgr = cxt.logManager;
-
-        // 检查term
-        if (cxt.currentTerm > msg.fromTerm) {
-            // ignore
-            e.ends();
-            return;
-        }
-
-        if (cxt.currentTerm < msg.fromTerm) {
-            // 自身有问题, 降级
-            // todo
-        }
-
-        AppendLogEntryRequest requestMsg = (AppendLogEntryRequest) cxt.netManager.getMsg(cxt.currentTerm, msg.relatedMsgId);
+        AppendLogResponseEvent e = (AppendLogResponseEvent) e1;
+        // todo
+        AppendLogEntryRequest requestMsg = null;
 
         if (requestMsg == null) {
             throw new RuntimeException("");
         }
 
         // do real work
+        AppendLogEntryResponse msg = (AppendLogEntryResponse) e.raftMessage;
+
         if (msg.success) {
 
             // 更新本地follower 的nextIndex记录
@@ -85,6 +70,8 @@ public class AppendLogResponseHandler implements EventHandler {
     }
 
 
+
+
     private void tryCommit(int follower, long lastLogNo) {
 
         // 检查是否达到commit标准.
@@ -101,27 +88,6 @@ public class AppendLogResponseHandler implements EventHandler {
                 break;
             }
         }
-
-
-
-
-//        for (Long logPosition : cxt.keySet()) {
-//            if (prepareMap.get(logPosition).size() > half) {
-//                // 该logPosition可以判定为 can commit
-//
-//                // 那么 commitIndex++, 然后从 prepareMap remove.
-//                logMgr.commitIndex = logMgr.commitIndex > logPosition ? logMgr.commitIndex : logPosition;
-//                logMgr.getPrepareLogMap().remove(logPosition);
-//
-//                /**
-//                 * 状态
-//                 * 1. prepare
-//                 * 2. committed
-//                 * 3. applied
-//                 */
-//                LogEntry logEntry = logMgr.updateLogEntryStatus(logPosition, 2);
-//            }
-//        }
 
     }
 

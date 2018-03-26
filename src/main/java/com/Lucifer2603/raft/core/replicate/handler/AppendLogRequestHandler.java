@@ -64,9 +64,6 @@ public class AppendLogRequestHandler extends DefaultEventHandler {
             // 如果localTerm过旧, 说明掉线过, 需要update.
             // update会暂停一切操作,并刷新所有数据
             if (remoteTerm > localTerm) {
-                // 这里不应该使用 eventEngine. 因为是异步的.
-                //            cxt.eventEngine.publishEvent(EventBuilder.buildRefreshLocalContextEvent());
-                // 应当使用同步的方法
                 cxt.refresh();
                 return false;
             }
