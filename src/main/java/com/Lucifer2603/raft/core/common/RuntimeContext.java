@@ -67,8 +67,7 @@ public class RuntimeContext {
     // 如果在某个term voteFor过, 那么设定为这个term的值.
     public volatile int voteForFlag = 0;
 
-    // 当follower的时候,上次接受到来自leader的 HeartBeat 的时间
-    public volatile long lastHeartBeatTime;
+
 
 
 
@@ -96,7 +95,6 @@ public class RuntimeContext {
     // clear all resources and flags.
     public void clear() {
 
-        lastHeartBeatTime = System.currentTimeMillis();
         electAcceptSet.clear();
         electAcceptSet.clear();
 
