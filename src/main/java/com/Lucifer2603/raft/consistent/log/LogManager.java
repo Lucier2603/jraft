@@ -15,7 +15,7 @@ public class LogManager {
     private LogEntry[] logRecords = new LogEntry[1000];
 
     // term -> 该term的第一个log,在List中的index
-    private Map<Integer, Integer> termIndexMap = new HashMap<>();
+    private final Map<Integer, Integer> TermToFirstLogNoMap = new HashMap<>();
 
     // 最大已提交
     // 一个已提交的log,保证之前的全部都被提交了.
@@ -28,8 +28,10 @@ public class LogManager {
     private ReentrantLock lock;
 
 
-
-
+    
+    /**
+     * 日志写入
+     */
     // 如果append成功,那么说明follower已经做好了接受的准备,可以回复success.
     public void append(LogEntry[] newEntries, int prevTerm, int prevIndex) {
 
@@ -41,13 +43,29 @@ public class LogManager {
             resize();
         }
 
+        // 复制日志
         System.arraycopy(newEntries, 0, logRecords, startIdx + 1, newEntries.length);
 
     }
 
+    /**
+     * 日志查询
+     */
+    // 获取最大的已执行的日志 logNo
+    public int
+
+
+
+
+
+
+
+
+
+    // 根据当前 term 和 logNo, 找到其在日志存储队列中的位置.
     public int findByTermAndNo(int term, int no) {
 
-        int termIdx = termIndexMap.get(term);
+        int termIdx = TermToFirstLogNoMap.get(term);
 
         int startIdx = termIdx;
         for (;logRecords[startIdx].logNo == no && logRecords[startIdx].logTerm == no;startIdx++) {
@@ -56,6 +74,7 @@ public class LogManager {
 
         return startIdx;
     }
+
 
     public LogEntry findByPosition(int pos) {
         return logRecords[pos];

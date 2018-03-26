@@ -2,13 +2,14 @@ package com.Lucifer2603.raft.core.replicate.handler;
 
 
 /**
+ * 收到 复制日志的 请求.
+ *
  * @author zhangchen20
- *
- *
  */
 
 
 import com.Lucifer2603.raft.consistent.log.LogManager;
+import com.Lucifer2603.raft.consistent.log.LogManagerHelper;
 import com.Lucifer2603.raft.constants.RoleType;
 import com.Lucifer2603.raft.core.Event.Event;
 import com.Lucifer2603.raft.core.Event.EventBuilder;
@@ -78,7 +79,7 @@ public class AppendLogRequestHandler implements EventHandler {
             return;
         }
 
-        // 如果localTerm过旧,那么update.
+        // 如果localTerm过旧, 说明掉线过, 需要update.
         // update会暂停一切操作,并刷新所有数据
         if (remoteTerm > localTerm) {
             // 这里不应该使用 eventEngine. 因为是异步的.
@@ -89,18 +90,27 @@ public class AppendLogRequestHandler implements EventHandler {
             return;
         }
 
+        
+        /**
+         * 正常情况下, 从这里开始走
+         */
         // 更新heartbeat timeout
         cxt.lastHeartBeatTime = System.currentTimeMillis();
 
         // 直接写入日志.如果成功则回复OK.否则reject.
-        LogManager logMgr = cxt.logManager;
+        LogManagerHelper logMgr = cxt.logManager;
         AppendLogEntryRequest msg = (AppendLogEntryRequest) event.raftMessage;
 
         try {
-            logMgr.append(msg.newEntries, msg.prevLogTerm, msg.prevLogIndex);
+            // 如果没有找到这样一条日志,她的term和logNo, 与传入的 prevTerm, prevLogIndex相等, 那么就给leader返回false, 说明双方不一致
+            // 于是, leader就会回退且再次发送appendLogRequest, 直到可以匹配上.
+            logMgr.appendLogs(msg.newEntries, msg.prevLogTerm, msg.prevLogIndex);
             success(event);
+
         } catch (Exception t) {
+
             reject(event);
+
         }
 
 
@@ -120,7 +130,9 @@ public class AppendLogRequestHandler implements EventHandler {
 
         e.successFlag = true;
 
-        // todo getPrevMatch;
+        // 当成功时, prev就是当前值
+        e.prevMatchTerm = RuntimeContext.get().currentTerm;
+        e.prevMatchIndex =
 
         e.pass();
     }

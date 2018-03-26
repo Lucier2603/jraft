@@ -2,11 +2,13 @@ package com.Lucifer2603.raft.core.common;
 
 
 import com.Lucifer2603.raft.consistent.log.LogManager;
+import com.Lucifer2603.raft.consistent.log.LogManagerHelper;
 import com.Lucifer2603.raft.constants.RoleType;
 import com.Lucifer2603.raft.core.Event.EventEngine;
 import com.Lucifer2603.raft.core.replicate.BackendJob;
 import com.Lucifer2603.raft.core.replicate.event.AppendLogClientEvent;
 import com.Lucifer2603.raft.net.NetManager;
+import com.Lucifer2603.raft.utils.buffer.ByteBufferPool;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -34,11 +36,13 @@ public class RuntimeContext {
     // Component
     public EventEngine eventEngine;
 
-    public LogManager logManager;
+    public LogManagerHelper logManager;
 
     public NetManager netManager;
 
     public BackendJob timeJob;
+
+    public ByteBufferPool bufferPool;
 
     // todo 内存管理器 境外内存
     // todo destory时,使用Runtime.getRuntime().addShutdownHook
@@ -63,7 +67,7 @@ public class RuntimeContext {
     // 如果在某个term voteFor过, 那么设定为这个term的值.
     public volatile int voteForFlag = 0;
 
-    // 当follower的时候,上次接受到 HeartBeat 的时间
+    // 当follower的时候,上次接受到来自leader的 HeartBeat 的时间
     public volatile long lastHeartBeatTime;
 
 
@@ -80,6 +84,7 @@ public class RuntimeContext {
         this.lock.unlock();
     }
 
+    // todo 按照当前的role, 返回对应的cxt.
     public static RuntimeContext get() {
         return context;
     }

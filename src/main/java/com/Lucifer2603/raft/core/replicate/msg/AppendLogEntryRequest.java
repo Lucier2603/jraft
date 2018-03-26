@@ -15,10 +15,10 @@ public class AppendLogEntryRequest extends RaftMessage {
 
     public LogEntry[] newEntries;
 
-    public int prevLogTerm;
+    public long prevLogTerm;
 
-    public int prevLogIndex;
+    public long prevLogIndex;
 
-    public int leaderCommitIndex;
+    public long leaderCommitIndex;
 
 }
