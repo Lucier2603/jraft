@@ -23,4 +23,8 @@ public class AppendResponse extends BaseResponse {
     public void setLogIndex(long logIndex) {
         this.logIndex = logIndex;
     }
+
+    public String getType() {
+        return "AppendResponse";
+    }
 }

@@ -5,6 +5,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
+import com.Lucifer2603.raft.protocol.serializable.RaftSerializable;
+
 /**
  * ListenerManager
  *
@@ -38,7 +40,9 @@ public class ListenerManager implements Listener {
             lock.tryLock(5, TimeUnit.SECONDS);
 
             for (Listener listener : listeners) {
-                listener.invoke();
+                if (!listener.skip()) {
+                    listener.invoke();
+                }
             }
 
             lock.unlock();
@@ -48,5 +52,9 @@ public class ListenerManager implements Listener {
             lock.unlock();
             throw new RuntimeException("");
         }
+    }
+
+    public boolean skip() {
+        return false;
     }
 }

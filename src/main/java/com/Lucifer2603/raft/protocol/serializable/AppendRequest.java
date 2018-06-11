@@ -32,4 +32,8 @@ public class AppendRequest extends BaseRequest {
     public long getCommitIndex() {
         return commitIndex;
     }
+
+    public String getType() {
+        return "AppendRequest";
+    }
 }

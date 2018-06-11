@@ -7,5 +7,7 @@ package com.Lucifer2603.raft.listener;
  */
 public interface Listener {
 
+    boolean skip();
+
     void invoke();
 }

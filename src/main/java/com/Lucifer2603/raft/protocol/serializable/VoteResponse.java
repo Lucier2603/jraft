@@ -14,4 +14,8 @@ public class VoteResponse extends BaseResponse {
     public void setVoted(boolean voted) {
         this.voted = voted;
     }
+
+    public String getType() {
+        return "VoteResponse";
+    }
 }

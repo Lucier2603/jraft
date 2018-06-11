@@ -32,4 +32,8 @@ public class VoteRequest extends BaseRequest {
     public void setLogTerm(long logTerm) {
         this.logTerm = logTerm;
     }
+
+    public String getType() {
+        return "VoteRequest";
+    }
 }
