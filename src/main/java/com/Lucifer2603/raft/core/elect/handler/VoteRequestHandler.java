@@ -3,8 +3,12 @@ package com.Lucifer2603.raft.core.elect.handler;
 
 import com.Lucifer2603.raft.consistent.log.LogEntry;
 import com.Lucifer2603.raft.consistent.log.LogManager;
+import com.Lucifer2603.raft.core.DefaultEventHandler;
 import com.Lucifer2603.raft.core.Event.Event;
 import com.Lucifer2603.raft.core.EventHandler;
+import com.Lucifer2603.raft.core.common.CandidateRuntimeContext;
+import com.Lucifer2603.raft.core.common.FollowerRuntimeContext;
+import com.Lucifer2603.raft.core.common.LeaderRuntimeContext;
 import com.Lucifer2603.raft.core.common.RuntimeContext;
 import com.Lucifer2603.raft.core.elect.event.VoteRequestEvent;
 import com.Lucifer2603.raft.core.elect.msg.PongMessage;
@@ -13,15 +17,44 @@ import com.Lucifer2603.raft.core.elect.msg.VoteResponse;
 import com.Lucifer2603.raft.net.msg.MessageBuilder;
 
 /**
+ * 接收到 vote请求 的
  * @author zhangchen20
  */
-public class VoteRequestHandler implements EventHandler {
+public class VoteRequestHandler extends DefaultEventHandler {
+
+    @Override
+    public boolean doCheckTerm(int remoteTerm, int localTerm, Event e, RuntimeContext cxt) {
+        return false;
+    }
+
+    @Override
+    public boolean checkEvent(Event e) {
+        return e instanceof VoteRequestEvent;
+    }
+
+    @Override
+    public void processAsLeader(Event e, LeaderRuntimeContext cxt) {
+
+    }
+
+    @Override
+    public void processAsCandidate(Event e, CandidateRuntimeContext cxt) {
+        // candidate 不会对其他vote投票, 除非那个vote与自己的term不同.
+    }
+
+    // 作为follower, 只需要投票即可. 但是一个follower只能对一个term投票.
+    @Override
+    public void processAsFollower(Event e, FollowerRuntimeContext cxt) {
+        // 同步获得锁
+        cxt.voteLock.lock();
+
+        // todo ???
+        // 是否存在这种情况, 有一个节点无法接收其他节点的消息, 于是自己不断处于candidate状态, 从而不断自增term, 并对外广播?
+        // 这个时候应该如何处理?
+
+    }
 
     public void process(Event e) {
-
-        if (!(e instanceof VoteRequestEvent)) {
-            return;
-        }
 
         VoteRequestEvent event = (VoteRequestEvent) e;
         RuntimeContext cxt = RuntimeContext.get();

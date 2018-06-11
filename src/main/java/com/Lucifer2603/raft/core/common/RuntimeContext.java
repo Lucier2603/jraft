@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -65,6 +66,16 @@ public class RuntimeContext {
     // 当follower的时候,是否accept/reject过VoteRequest
     // 如果在某个term voteFor过, 那么设定为这个term的值.
     public volatile int voteForFlag = 0;
+    
+    
+    
+    
+    
+    /**
+     * vote相关
+     */
+    // 当前已经被投过票的term.
+    public AtomicInteger voteTerm;
 
 
 
